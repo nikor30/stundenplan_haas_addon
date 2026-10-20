@@ -10,7 +10,6 @@ import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlow
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.selector import (
     BooleanSelector,
     ColorRGBSelector,
@@ -54,15 +53,11 @@ async def _async_fetch_defaults(
     hass: HomeAssistant, base_url: str, username: str, password: str
 ) -> dict[str, Any]:
     """Log in once and return the portal defaults (including the user's classes)."""
-    session = async_create_clientsession(
-        hass, auto_cleanup=False, cookie_jar=aiohttp.CookieJar()
-    )
-    try:
+    # A short-lived session of our own: Home Assistant's shared sessions must not be closed.
+    async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar()) as session:
         client = SchuleInternClient(session, base_url, username, password)
         await client.async_login()
         return await client.async_get_defaults()
-    finally:
-        await session.close()
 
 
 def _hex_to_rgb(value: str) -> list[int]:

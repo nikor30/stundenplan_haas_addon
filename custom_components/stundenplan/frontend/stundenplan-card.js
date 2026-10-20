@@ -10,7 +10,7 @@
  * release, rubber-banding at the top edge, and cross-fades for reduced motion.
  */
 
-const VERSION = "0.1.0";
+const VERSION = "0.1.1";
 
 const esc = (value) =>
   String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
