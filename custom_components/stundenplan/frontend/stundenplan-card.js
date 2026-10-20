@@ -10,7 +10,7 @@
  * release, rubber-banding at the top edge, and cross-fades for reduced motion.
  */
 
-const VERSION = "0.1.3";
+const VERSION = "0.1.4";
 
 const esc = (value) =>
   String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -746,8 +746,19 @@ class StundenplanCard extends HTMLElement {
   }
 }
 
-if (!customElements.get("stundenplan-sheet")) customElements.define("stundenplan-sheet", StundenplanSheet);
-if (!customElements.get("stundenplan-card")) customElements.define("stundenplan-card", StundenplanCard);
+// The integration loads this file before the HA app boots. On older browsers (e.g. Chrome 102
+// kiosks) the app then replaces window.customElements with a scoped-registry polyfill, which
+// would not know elements defined earlier. Define once the app's own element exists instead.
+function defineElements(tries = 0) {
+  const registry = window.customElements;
+  if (!registry.get("home-assistant") && tries < 200) {
+    setTimeout(() => defineElements(tries + 1), 50);
+    return;
+  }
+  if (!registry.get("stundenplan-sheet")) registry.define("stundenplan-sheet", StundenplanSheet);
+  if (!registry.get("stundenplan-card")) registry.define("stundenplan-card", StundenplanCard);
+}
+defineElements();
 
 window.customCards = window.customCards || [];
 if (!window.customCards.some((c) => c.type === "stundenplan-card")) {

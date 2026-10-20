@@ -82,12 +82,6 @@ async def test_card_is_served(hass: HomeAssistant, mock_portal, hass_client) -> 
     assert resp.status == 200
     assert "stundenplan-card" in await resp.text()
 
-    from homeassistant.components.frontend import DATA_EXTRA_JS_URL_ES5, DATA_EXTRA_MODULE_URL
-
-    # Old kiosk browsers get the es5 build and only load the es5 list.
-    for key in (DATA_EXTRA_MODULE_URL, DATA_EXTRA_JS_URL_ES5):
-        assert any("stundenplan-card.js" in url for url in hass.data[key].urls)
-
 
 def test_window_across_midnight() -> None:
     days = ["fri"]

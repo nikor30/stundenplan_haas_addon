@@ -29,10 +29,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     await hass.http.async_register_static_paths(
         [StaticPathConfig(FRONTEND_URL, str(Path(__file__).parent / "frontend"), False)]
     )
-    url = f"{FRONTEND_URL}/{CARD_FILENAME}?v={integration.version}"
-    add_extra_js_url(hass, url)
-    # Browsers HA considers outdated (e.g. Electron kiosks) get the es5 build, which skips extra modules.
-    add_extra_js_url(hass, url, es5=True)
+    add_extra_js_url(hass, f"{FRONTEND_URL}/{CARD_FILENAME}?v={integration.version}")
     return True
 
 
