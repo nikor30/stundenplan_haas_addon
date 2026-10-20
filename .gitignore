@@ -8,12 +8,6 @@ Thumbs.db
 *.swp
 *~
 
-# Environment / secrets
-.env
-.env.*
-!.env.example
-secrets.yaml
-
 # Python
 __pycache__/
 *.py[cod]
@@ -21,14 +15,19 @@ __pycache__/
 venv/
 *.egg-info/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
-# Node
-node_modules/
-npm-debug.log*
+# Local Home Assistant dev instance
+config/
+.storage/
+home-assistant.log*
+home-assistant_v2.db*
+secrets.yaml
 
-# Build output
-dist/
-build/
-
-# Logs
-*.log
+# Environment / secrets
+.env
+.env.*
+!.env.example
