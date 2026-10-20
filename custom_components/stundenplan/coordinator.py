@@ -26,6 +26,7 @@ class StundenplanRuntime:
     client: SchuleInternClient
     coordinator: StundenplanCoordinator
     popup_enabled: bool = True
+    popup_forced_at: Any = None
     popup_forced_until: Any = None
     _listeners: list[Callable[[], None]] = field(default_factory=list)
 

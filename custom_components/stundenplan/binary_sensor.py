@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
+from typing import Any
 
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.core import HomeAssistant, callback
@@ -72,8 +73,22 @@ class PopupBinarySensor(StundenplanEntity, BinarySensorEntity):
 
     @property
     def is_on(self) -> bool:
+        return self._shown_since() is not None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        # The card remembers a closed pop-up per showing; a new value here shows it again.
+        shown_since = self._shown_since()
+        return {"shown_since": shown_since.isoformat() if shown_since else None}
+
+    def _shown_since(self) -> datetime | None:
+        """When the current showing started, or None while the pop-up is off."""
         runtime = self._entry.runtime_data
         now = dt_util.now()
         if runtime.popup_forced_until and now < runtime.popup_forced_until:
-            return True
-        return runtime.popup_enabled and in_window(now, self._start, self._end, self._days)
+            return runtime.popup_forced_at
+        if not (runtime.popup_enabled and in_window(now, self._start, self._end, self._days)):
+            return None
+        start = now.replace(hour=self._start.hour, minute=self._start.minute, second=0, microsecond=0)
+        # A window crossing midnight started yesterday.
+        return start if start <= now else start - timedelta(days=1)

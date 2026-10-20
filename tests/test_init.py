@@ -48,7 +48,28 @@ async def test_entities_and_popup(hass: HomeAssistant, mock_portal, freezer: Fro
     assert hass.states.get("binary_sensor.niko_pop_up").state == "off"
 
     await hass.services.async_call("button", "press", {"entity_id": "button.niko_show_pop_up_now"}, blocking=True)
-    assert hass.states.get("binary_sensor.niko_pop_up").state == "on"
+    first = hass.states.get("binary_sensor.niko_pop_up")
+    assert first.state == "on"
+
+    # Pressing again while it's still on starts a new showing, so a closed sheet reappears.
+    freezer.tick(30)
+    await hass.services.async_call("button", "press", {"entity_id": "button.niko_show_pop_up_now"}, blocking=True)
+    second = hass.states.get("binary_sensor.niko_pop_up")
+    assert second.state == "on"
+    assert second.attributes["shown_since"] != first.attributes["shown_since"]
+
+
+async def test_window_showing_is_stable(hass: HomeAssistant, mock_portal, freezer: FrozenDateTimeFactory) -> None:
+    await hass.config.async_set_time_zone("Europe/Berlin")
+    freezer.move_to(datetime(2026, 10, 20, 7, 5, tzinfo=dt_util.get_default_time_zone()))
+    await _setup(hass)
+    first = hass.states.get("binary_sensor.niko_pop_up").attributes["shown_since"]
+    assert first.startswith("2026-10-20T07:00:00")
+
+    freezer.move_to(datetime(2026, 10, 20, 7, 10, tzinfo=dt_util.get_default_time_zone()))
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done()
+    assert hass.states.get("binary_sensor.niko_pop_up").attributes["shown_since"] == first
 
 
 async def test_card_is_served(hass: HomeAssistant, mock_portal, hass_client) -> None:

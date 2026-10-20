@@ -37,5 +37,6 @@ class ShowPopupButton(StundenplanEntity, ButtonEntity):
 
     async def async_press(self) -> None:
         runtime = self._entry.runtime_data
-        runtime.popup_forced_until = dt_util.now() + SHOW_FOR
+        runtime.popup_forced_at = dt_util.now()
+        runtime.popup_forced_until = runtime.popup_forced_at + SHOW_FOR
         runtime.notify()

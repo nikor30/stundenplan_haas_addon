@@ -10,7 +10,7 @@
  * release, rubber-banding at the top edge, and cross-fades for reduced motion.
  */
 
-const VERSION = "0.1.1";
+const VERSION = "0.1.2";
 
 const esc = (value) =>
   String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -618,7 +618,7 @@ class StundenplanCard extends HTMLElement {
     const signature = JSON.stringify([
       dark,
       this.editMode,
-      kids.map((k) => [k.entity_id, k.last_updated, hass.states[k.attributes.popup_entity]?.last_changed, hass.states[k.attributes.popup_entity]?.state]),
+      kids.map((k) => [k.entity_id, k.last_updated, hass.states[k.attributes.popup_entity]?.last_updated]),
     ]);
     if (signature === this.signature) return;
     this.signature = signature;
@@ -695,10 +695,10 @@ class StundenplanCard extends HTMLElement {
     requestAnimationFrame(() => this.sheet?.present());
   }
 
-  // One key per pop-up window, so a dismissed sheet comes back the next day.
+  // One key per showing (each day's window, each button press), so a closed sheet comes back next time.
   _dismissKey(kid) {
     const popup = this._hass.states[kid.attributes.popup_entity];
-    return `${kid.entity_id}@${popup?.last_changed}`;
+    return `${kid.entity_id}@${popup?.attributes.shown_since || popup?.last_changed}`;
   }
 
   _renderInline(kids, dark) {
