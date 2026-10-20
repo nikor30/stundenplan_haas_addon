@@ -1,0 +1,105 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Schulportal-Anmeldung",
+        "description": "Melde dich mit dem Eltern-Zugang deines SchuleIntern-Portals an. Für ein weiteres Kind fügst du die Integration einfach noch einmal hinzu.",
+        "data": {
+          "base_url": "Portal-Adresse",
+          "username": "Benutzername (E-Mail)",
+          "password": "Passwort"
+        }
+      },
+      "kid": {
+        "title": "Kind hinzufügen",
+        "description": "Klassen in diesem Zugang: {classes}. Das Pop-up erscheint täglich im gewählten Zeitfenster auf dem Dashboard mit der Stundenplan-Karte.",
+        "data": {
+          "kid_name": "Name des Kindes",
+          "school_class": "Klasse",
+          "popup_start": "Pop-up ab",
+          "popup_end": "Pop-up bis",
+          "popup_days": "An diesen Tagen"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Erneut anmelden",
+        "description": "Das Portal hat das Passwort für {username} abgelehnt. Bitte gib das aktuelle Passwort ein.",
+        "data": { "password": "Passwort" }
+      }
+    },
+    "error": {
+      "invalid_auth": "Benutzername oder Passwort sind nicht korrekt.",
+      "cannot_connect": "Das Portal ist nicht erreichbar."
+    },
+    "abort": {
+      "already_configured": "Dieses Kind ist bereits eingerichtet.",
+      "reauth_successful": "Anmeldung aktualisiert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Stundenplan von {kid}",
+        "description": "Änderungen werden erst mit „Speichern“ übernommen.",
+        "menu_options": {
+          "popup": "Pop-up & Farbe",
+          "courses": "Belegte Kurse",
+          "subjects": "Fächer benennen & einfärben",
+          "save": "Speichern"
+        }
+      },
+      "popup": {
+        "title": "Pop-up & Farbe",
+        "data": {
+          "popup_start": "Pop-up ab",
+          "popup_end": "Pop-up bis",
+          "popup_days": "An diesen Tagen",
+          "accent_color": "Akzentfarbe"
+        }
+      },
+      "courses": {
+        "title": "Belegte Kurse",
+        "description": "Diese Fächer finden parallel statt (z. B. Religion/Ethik, Sportgruppen). Wähle nur die, die {kid} besucht – die anderen werden ausgeblendet.",
+        "data": { "taken_subjects": "Besuchte Kurse" }
+      },
+      "subjects": {
+        "title": "Fach auswählen",
+        "data": { "subject": "Fach" }
+      },
+      "subject": {
+        "title": "Fach {code}",
+        "description": "Der Hinweis erscheint im Pop-up an Tagen mit diesem Fach, z. B. „Sportsachen mitnehmen“.",
+        "data": {
+          "name": "Anzeigename",
+          "icon": "Emoji",
+          "color": "Farbe",
+          "hint": "Hinweis",
+          "reset": "Auf Standard zurücksetzen"
+        }
+      }
+    },
+    "abort": {
+      "no_courses": "Im Stundenplan gibt es keine parallelen Kurse.",
+      "no_subjects": "Der Stundenplan ist noch nicht geladen. Bitte später erneut versuchen."
+    }
+  },
+  "selector": {
+    "weekday": {
+      "options": {
+        "mon": "Montag",
+        "tue": "Dienstag",
+        "wed": "Mittwoch",
+        "thu": "Donnerstag",
+        "fri": "Freitag",
+        "sat": "Samstag",
+        "sun": "Sonntag"
+      }
+    }
+  },
+  "entity": {
+    "sensor": { "timetable": { "name": "Stundenplan" } },
+    "binary_sensor": { "popup": { "name": "Pop-up" } },
+    "switch": { "popup_enabled": { "name": "Pop-up nach Zeitplan" } },
+    "button": { "show_popup": { "name": "Pop-up jetzt zeigen" } }
+  }
+}

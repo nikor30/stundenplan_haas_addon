@@ -1,0 +1,3 @@
+pytest-homeassistant-custom-component
+# The integration depends on the frontend component, which needs the built frontend package.
+home-assistant-frontend

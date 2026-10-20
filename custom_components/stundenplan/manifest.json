@@ -1,0 +1,13 @@
+{
+  "domain": "stundenplan",
+  "name": "Stundenplan",
+  "codeowners": ["@nikor30"],
+  "config_flow": true,
+  "dependencies": ["frontend", "http"],
+  "documentation": "https://github.com/nikor30/stundenplan_haas_addon",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/nikor30/stundenplan_haas_addon/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

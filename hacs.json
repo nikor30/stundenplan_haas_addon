@@ -1,3 +1,4 @@
 {
-  "name": "Stundenplan"
+  "name": "Stundenplan",
+  "homeassistant": "2024.12.0"
 }

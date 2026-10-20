@@ -1,0 +1,105 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "School portal login",
+        "description": "Log in with the parent account of your SchuleIntern portal. To add another kid, add the integration again.",
+        "data": {
+          "base_url": "Portal address",
+          "username": "Username (email)",
+          "password": "Password"
+        }
+      },
+      "kid": {
+        "title": "Add a kid",
+        "description": "Classes in this account: {classes}. The pop-up appears daily during the chosen window on the dashboard that has the Stundenplan card.",
+        "data": {
+          "kid_name": "Kid's name",
+          "school_class": "Class",
+          "popup_start": "Pop-up from",
+          "popup_end": "Pop-up until",
+          "popup_days": "On these days"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Log in again",
+        "description": "The portal rejected the password for {username}. Enter the current password.",
+        "data": { "password": "Password" }
+      }
+    },
+    "error": {
+      "invalid_auth": "Username or password is incorrect.",
+      "cannot_connect": "The portal can't be reached."
+    },
+    "abort": {
+      "already_configured": "This kid is already set up.",
+      "reauth_successful": "Login updated."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "{kid}'s timetable",
+        "description": "Changes are only applied when you choose Save.",
+        "menu_options": {
+          "popup": "Pop-up & colour",
+          "courses": "Courses taken",
+          "subjects": "Rename & colour subjects",
+          "save": "Save"
+        }
+      },
+      "popup": {
+        "title": "Pop-up & colour",
+        "data": {
+          "popup_start": "Pop-up from",
+          "popup_end": "Pop-up until",
+          "popup_days": "On these days",
+          "accent_color": "Accent colour"
+        }
+      },
+      "courses": {
+        "title": "Courses taken",
+        "description": "These subjects run in parallel (e.g. religion/ethics, sport groups). Select only the ones {kid} attends; the others are hidden.",
+        "data": { "taken_subjects": "Courses attended" }
+      },
+      "subjects": {
+        "title": "Choose a subject",
+        "data": { "subject": "Subject" }
+      },
+      "subject": {
+        "title": "Subject {code}",
+        "description": "The hint appears in the pop-up on days with this subject, e.g. \"Bring sports kit\".",
+        "data": {
+          "name": "Display name",
+          "icon": "Emoji",
+          "color": "Colour",
+          "hint": "Hint",
+          "reset": "Reset to default"
+        }
+      }
+    },
+    "abort": {
+      "no_courses": "The timetable has no parallel courses.",
+      "no_subjects": "The timetable hasn't loaded yet. Try again later."
+    }
+  },
+  "selector": {
+    "weekday": {
+      "options": {
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday",
+        "sun": "Sunday"
+      }
+    }
+  },
+  "entity": {
+    "sensor": { "timetable": { "name": "Timetable" } },
+    "binary_sensor": { "popup": { "name": "Pop-up" } },
+    "switch": { "popup_enabled": { "name": "Scheduled pop-up" } },
+    "button": { "show_popup": { "name": "Show pop-up now" } }
+  }
+}
