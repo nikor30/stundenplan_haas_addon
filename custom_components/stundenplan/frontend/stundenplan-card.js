@@ -10,7 +10,7 @@
  * release, rubber-banding at the top edge, and cross-fades for reduced motion.
  */
 
-const VERSION = "0.1.2";
+const VERSION = "0.1.3";
 
 const esc = (value) =>
   String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -119,10 +119,12 @@ const STYLES = `
     display: inline-flex; align-items: center; gap: 0.375rem;
     padding: 0.375rem 0.75rem; border-radius: 999px;
     font-size: 0.875rem; font-weight: 600; letter-spacing: -0.005em;
+    background: rgba(128, 128, 128, 0.16);
     background: color-mix(in srgb, var(--accent) 14%, transparent);
     color: var(--accent);
   }
   .chip.warn {
+    background: rgba(128, 128, 128, 0.16);
     background: color-mix(in srgb, var(--sp-orange) 16%, transparent);
     color: var(--sp-orange);
   }
@@ -174,6 +176,7 @@ const STYLES = `
     display: flex; flex-direction: column; justify-content: center;
     min-width: 0; padding: 0.4375rem 0.625rem 0.4375rem 0.75rem;
     border-radius: 0.75rem;
+    background: rgba(128, 128, 128, 0.16);
     background: color-mix(in srgb, var(--c) 15%, transparent);
     overflow: hidden;
   }
@@ -324,6 +327,7 @@ const SHEET_STYLES = `
   .sheet {
     position: absolute; left: 50%; bottom: 1rem;
     width: min(70rem, calc(100vw - 2rem));
+    max-height: calc(100vh - 2rem);
     max-height: calc(100dvh - 2rem);
     display: flex; flex-direction: column;
     box-sizing: border-box;
@@ -390,7 +394,7 @@ const SHEET_STYLES = `
   .content.switching { opacity: 0; }
 
   @media (max-width: 640px) {
-    .sheet { bottom: 0; width: 100vw; border-radius: 1.5rem 1.5rem 0 0; max-height: 94dvh; }
+    .sheet { bottom: 0; width: 100vw; border-radius: 1.5rem 1.5rem 0 0; max-height: 94vh; max-height: 94dvh; }
     .drag { padding: 0.5rem 1rem 0; }
     .content { padding: 0 1rem 1.25rem; }
   }
