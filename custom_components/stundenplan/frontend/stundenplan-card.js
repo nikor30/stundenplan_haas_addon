@@ -4,13 +4,14 @@
  * mode: popup (default) - invisible on the dashboard; slides up a sheet while a
  *       kid's pop-up binary sensor is on.
  * mode: inline          - renders the timetable as a normal card.
+ * scale: 1.05           - optional size factor for the pop-up's contents.
  *
  * Motion follows Apple's fluid-interface rules: springs instead of fixed-duration
  * animations, 1:1 drag tracking, velocity handoff and momentum projection on
  * release, rubber-banding at the top edge, and cross-fades for reduced motion.
  */
 
-const VERSION = "0.1.4";
+const VERSION = "0.1.5";
 
 const esc = (value) =>
   String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -325,7 +326,7 @@ const SHEET_STYLES = `
     opacity: 0;
   }
   .sheet {
-    position: absolute; left: 50%; bottom: 1rem;
+    position: absolute; left: 50%; top: 50%;
     width: min(70rem, calc(100vw - 2rem));
     max-height: calc(100vh - 2rem);
     max-height: calc(100dvh - 2rem);
@@ -339,10 +340,11 @@ const SHEET_STYLES = `
       inset 0 0.5px 0 rgba(255, 255, 255, 0.5),
       0 0 0 0.5px rgba(0, 0, 0, 0.08),
       0 24px 64px rgba(0, 0, 0, 0.22);
-    transform: translate(-50%, 110%);
+    transform: translate(-50%, 100vh);
     will-change: transform;
     --accent: #0a84ff;
   }
+  .drag, .content { zoom: var(--sp-scale, 1); }
   .drag {
     flex: none;
     padding: 0.5rem 1.75rem 0;
@@ -394,7 +396,7 @@ const SHEET_STYLES = `
   .content.switching { opacity: 0; }
 
   @media (max-width: 640px) {
-    .sheet { bottom: 0; width: 100vw; border-radius: 1.5rem 1.5rem 0 0; max-height: 94vh; max-height: 94dvh; }
+    .sheet { top: auto; bottom: 0; width: 100vw; border-radius: 1.5rem 1.5rem 0 0; max-height: 94vh; max-height: 94dvh; }
     .drag { padding: 0.5rem 1rem 0; }
     .content { padding: 0 1rem 1.25rem; }
   }
@@ -437,8 +439,23 @@ class StundenplanSheet extends HTMLElement {
     this._bindDrag();
   }
 
+  // Phones get a bottom sheet; wider screens a sheet centred on the screen.
+  get centered() {
+    return !window.matchMedia("(max-width: 640px)").matches;
+  }
+
+  // How far the sheet travels from its resting place to just below the screen.
   get height() {
-    return this.$(".sheet").getBoundingClientRect().height + 16;
+    const h = this.$(".sheet").getBoundingClientRect().height;
+    return (this.centered ? (window.innerHeight + h) / 2 : h) + 16;
+  }
+
+  setScale(scale) {
+    this.style.setProperty("--sp-scale", String(scale || 1));
+  }
+
+  _transform(y) {
+    return this.centered ? `translate(-50%, calc(-50% + ${y}px))` : `translate(-50%, ${y}px)`;
   }
 
   setTheme(dark) {
@@ -508,7 +525,7 @@ class StundenplanSheet extends HTMLElement {
   _set(y) {
     this.y = y;
     const h = this.height;
-    this.$(".sheet").style.transform = `translate(-50%, ${y}px)`;
+    this.$(".sheet").style.transform = this._transform(y);
     this.$(".scrim").style.opacity = String(Math.max(0, Math.min(1, 1 - y / h)));
   }
 
@@ -520,7 +537,7 @@ class StundenplanSheet extends HTMLElement {
       sheet.style.opacity = scrim.style.opacity = "0";
       sheet.getBoundingClientRect(); // commit the start state before fading in
     }
-    sheet.style.transform = "translate(-50%, 0)";
+    sheet.style.transform = this._transform(0);
     for (const el of [sheet, scrim]) {
       el.style.transition = "opacity 200ms ease";
       el.style.opacity = String(to);
@@ -559,7 +576,7 @@ class StundenplanSheet extends HTMLElement {
       const dt = (last.t - first.t) / 1000;
       const velocity = dt > 0 ? (last.y - first.y) / dt : 0;
       const projected = this.y + project(velocity);
-      if (projected > this.height * 0.4 && velocity >= 0) {
+      if (projected > this.$(".sheet").getBoundingClientRect().height * 0.4 && velocity >= 0) {
         this.dismiss(velocity);
       } else {
         // Thrown back up: a touch of bounce, because the gesture carried momentum.
@@ -607,6 +624,9 @@ class StundenplanCard extends HTMLElement {
   setConfig(config) {
     if (config.mode && !["popup", "inline"].includes(config.mode)) {
       throw new Error('mode must be "popup" or "inline"');
+    }
+    if (config.scale !== undefined && !(config.scale >= 0.5 && config.scale <= 2)) {
+      throw new Error("scale must be a number between 0.5 and 2");
     }
     this.config = { mode: "popup", ...config };
     this.signature = "";
@@ -695,6 +715,7 @@ class StundenplanCard extends HTMLElement {
       document.body.appendChild(this.sheet);
     }
     this.sheet.setTheme(dark);
+    this.sheet.setScale(this.config.scale);
     this.sheet.update(active);
     requestAnimationFrame(() => this.sheet?.present());
   }
