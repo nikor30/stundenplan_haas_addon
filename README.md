@@ -67,7 +67,7 @@ Options:
 | ---------- | ------------- | -------------------------------------------------------------- |
 | `mode`     | `popup`       | `popup` for the timed sheet, `inline` for a normal card        |
 | `entities` | all timetable | List of `sensor.*` timetable entities to include               |
-| `scale`    | `1`           | Size factor for the pop-up's text and lessons, e.g. `1.05`     |
+| `scale`    | `1`           | Size factor for the pop-up and its width, e.g. `1.5`           |
 
 ```yaml
 # A regular timetable card, e.g. for a parent's phone dashboard

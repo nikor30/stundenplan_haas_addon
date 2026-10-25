@@ -11,7 +11,7 @@
  * release, rubber-banding at the top edge, and cross-fades for reduced motion.
  */
 
-const VERSION = "0.1.5";
+const VERSION = "0.1.6";
 
 const esc = (value) =>
   String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -327,7 +327,7 @@ const SHEET_STYLES = `
   }
   .sheet {
     position: absolute; left: 50%; top: 50%;
-    width: min(70rem, calc(100vw - 2rem));
+    width: min(calc(70rem * var(--sp-scale, 1)), calc(100vw - 2rem));
     max-height: calc(100vh - 2rem);
     max-height: calc(100dvh - 2rem);
     display: flex; flex-direction: column;
