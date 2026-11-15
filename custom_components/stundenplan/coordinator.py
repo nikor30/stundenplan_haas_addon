@@ -12,7 +12,12 @@ from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 
-from .api import SchuleInternClient, StundenplanAuthError, StundenplanError
+from .api import (
+    SchuleInternClient,
+    StundenplanAuthError,
+    StundenplanError,
+    StundenplanRateLimited,
+)
 from .const import CONF_CLASS, CONF_HIDDEN, CONF_SUBJECTS, DOMAIN, UPDATE_INTERVAL
 from .model import build_timetable, subject_codes
 
@@ -62,17 +67,26 @@ class StundenplanCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         )
         self.client = client
         self.raw_plan: list[Any] = []
+        # Period times change at most once a school year: one request a day instead of one per poll.
+        self._defaults: dict[str, Any] | None = None
+        self._defaults_date: Any = None
 
     @property
     def subject_codes(self) -> list[str]:
         return subject_codes(self.raw_plan)
 
     async def _async_update_data(self) -> dict[str, Any]:
+        today = dt_util.now().date()
         try:
-            defaults = await self.client.async_get_defaults()
+            if self._defaults is None or self._defaults_date != today:
+                self._defaults = await self.client.async_get_defaults()
+                self._defaults_date = today
+            defaults = self._defaults
             plan = await self.client.async_get_plan(self.config_entry.data[CONF_CLASS])
         except StundenplanAuthError as err:
             raise ConfigEntryAuthFailed(str(err)) from err
+        except StundenplanRateLimited as err:
+            raise UpdateFailed(str(err), retry_after=err.retry_after) from err
         except StundenplanError as err:
             raise UpdateFailed(str(err)) from err
 
@@ -83,5 +97,5 @@ class StundenplanCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             plan,
             options.get(CONF_SUBJECTS, {}),
             options.get(CONF_HIDDEN, []),
-            dt_util.now().date(),
+            today,
         )

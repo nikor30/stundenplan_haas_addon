@@ -7,6 +7,7 @@ from typing import Any
 import aiohttp
 
 TIMEOUT = aiohttp.ClientTimeout(total=30)
+DEFAULT_RETRY_AFTER = 30 * 60  # seconds to back off when a 429 names no pause
 
 
 class StundenplanError(Exception):
@@ -19,6 +20,14 @@ class StundenplanAuthError(StundenplanError):
 
 class StundenplanConnectionError(StundenplanError):
     """The portal could not be reached or returned something unexpected."""
+
+
+class StundenplanRateLimited(StundenplanConnectionError):
+    """The portal answered HTTP 429; retry_after is the pause it asked for, in seconds."""
+
+    def __init__(self, retry_after: float) -> None:
+        super().__init__(f"Rate limited, retry in {retry_after:.0f} s")
+        self.retry_after = retry_after
 
 
 class SchuleInternClient:
@@ -101,6 +110,11 @@ class SchuleInternClient:
                 if resp.status in (401, 403):
                     self._logged_in = False
                     raise StundenplanAuthError(f"HTTP {resp.status}")
+                if resp.status == 429:
+                    header = resp.headers.get("Retry-After", "")
+                    raise StundenplanRateLimited(
+                        float(header) if header.isdigit() else DEFAULT_RETRY_AFTER
+                    )
                 if resp.status != 200:
                     raise StundenplanConnectionError(f"HTTP {resp.status} for {path}")
                 try:
