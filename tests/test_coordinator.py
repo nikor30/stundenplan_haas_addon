@@ -30,7 +30,8 @@ async def test_defaults_once_a_day_and_rate_limit(
     mock_portal.side_effect = StundenplanRateLimited(600)
     await coordinator.async_refresh()
     assert not coordinator.last_update_success
-    assert coordinator.data["today_lessons"] == 3  # the last good plan stays visible
+    await hass.async_block_till_done()
+    assert hass.states.get("sensor.niko_timetable").state == "3"  # the last good plan stays on screen
 
     mock_portal.side_effect = None
     freezer.move_to(datetime(2026, 10, 21, 9, 0, tzinfo=dt_util.get_default_time_zone()))

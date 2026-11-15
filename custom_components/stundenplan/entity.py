@@ -26,3 +26,8 @@ class StundenplanEntity(CoordinatorEntity[StundenplanCoordinator]):
             manufacturer="SchuleIntern",
             entry_type=DeviceEntryType.SERVICE,
         )
+
+    @property
+    def available(self) -> bool:
+        # A failed poll (the portal rate-limits) must not blank the plan that is already on screen.
+        return self.coordinator.data is not None
