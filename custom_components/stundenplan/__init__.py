@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from pathlib import Path
 
 import aiohttp
@@ -9,6 +10,7 @@ from homeassistant.components.frontend import add_extra_js_url
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME, Platform
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.typing import ConfigType
@@ -21,6 +23,9 @@ from .coordinator import StundenplanConfigEntry, StundenplanCoordinator, Stunden
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.BUTTON, Platform.SENSOR, Platform.SWITCH]
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+
+# entry_id -> monotonic time before which the portal must not be asked again
+_PAUSED_UNTIL: dict[str, float] = {}
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -35,6 +40,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
 async def async_setup_entry(hass: HomeAssistant, entry: StundenplanConfigEntry) -> bool:
     """Set up one kid's timetable."""
+    # Home Assistant retries a failed setup within minutes; stay off the portal for the pause it asked for.
+    if (wait := _PAUSED_UNTIL.get(entry.entry_id, 0) - time.monotonic()) > 0:
+        raise ConfigEntryNotReady(f"Rate limited, next try in {wait:.0f} s")
     # Own cookie jar: the portal session must not leak into other integrations.
     session = async_create_clientsession(hass, cookie_jar=aiohttp.CookieJar())
     client = SchuleInternClient(
@@ -44,7 +52,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: StundenplanConfigEntry) 
         entry.data[CONF_PASSWORD],
     )
     coordinator = StundenplanCoordinator(hass, entry, client)
-    await coordinator.async_config_entry_first_refresh()
+    try:
+        await coordinator.async_config_entry_first_refresh()
+    except ConfigEntryNotReady:
+        if retry_after := getattr(coordinator.last_exception, "retry_after", None):
+            _PAUSED_UNTIL[entry.entry_id] = time.monotonic() + retry_after
+        raise
 
     entry.runtime_data = StundenplanRuntime(client=client, coordinator=coordinator)
     # The timetable sensor points the card at the pop-up sensor, so that one must exist first.
